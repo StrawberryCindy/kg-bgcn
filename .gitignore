@@ -1,0 +1,7 @@
+/data_process/labels/
+/data_process/train_data/
+/child/
+/src/results/
+/src/bert-classification/
+/src/latest_classification_model/
+.DS_Store
