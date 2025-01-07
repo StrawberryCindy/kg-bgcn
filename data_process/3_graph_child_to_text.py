@@ -41,7 +41,7 @@ def find_child_name(device_name, file_list):
 
 def find_child_id(device_id, file_list):
     for file_name in file_list:
-        file_id = file_name.split('-')[0]
+        file_id = file_name.split('.')[0]
         if str(device_id) == file_id:
             return file_name
     return None
@@ -86,7 +86,7 @@ def get_device_info(device_node):
 
 def get_short_info(device_node, node):
     data_list = []
-    device_name = device_node['NAME']
+    device_name = device_node['name']
     did = node['id']
     label = str(node['labels'])
     result = f'设备{device_name}的{label}节点，'
@@ -108,7 +108,7 @@ def get_short_info(device_node, node):
 
 def get_devicechild_info(device_node, node):
     data_list = []
-    device_name = device_node['NAME']
+    device_name = device_node['name']
     keys = node_parameters[':DEVICECHILD']
     did = node[keys[0]]
     label = node[keys[1]]
@@ -144,7 +144,7 @@ def get_port_info(device_node, node, ip_list):
 
 def get_other_port_info(device_node, node):
     data_list = []
-    device_name = device_node['NAME']
+    device_name = device_node['name']
     did = node['id']
     label = str(node['labels'])
     result = f'设备{device_name}和其他设备的{label}节点进行通信，'
@@ -166,7 +166,7 @@ def get_other_port_info(device_node, node):
 
 def get_device_name_info(device_node, node):
     data_list = []
-    device_name = device_node['NAME']
+    device_name = device_node['name']
     node_name = node['name']
     did = node['id']
     label = str(node['labels'])
@@ -183,7 +183,7 @@ def get_device_name_info(device_node, node):
 def get_message_info(device_node, node, relation_dict, port_dict):
     data_list = []
     find_list = []
-    device_name = device_node['NAME']
+    device_name = device_node['name']
     keys = node_parameters[':MESSAGE']
     node_id = node['id']
     label = node[keys[1]]
@@ -276,7 +276,7 @@ def find_data_child(json_file, child_dir, save_dir):
             device_name = text.split('，')[0]
             child_file = find_child_name(device_name, file_list)
         if not child_file:
-            print('not find child file:', child_file)
+            # print('not find child file:', child_file)
             continue
         child_path = os.path.join(child_dir, child_file)
         shutil.copy(child_path, pkl_save_dir)
@@ -288,6 +288,7 @@ def find_data_child(json_file, child_dir, save_dir):
         for node in node_data:
             node['label'] = lable
         child_name = os.path.basename(child_path)
+        print(child_name)
         text_file = os.path.join(pkl_save_dir, child_name + '.json')
         with open(text_file, 'w', encoding='utf-8') as f:
             json.dump(node_data, f, ensure_ascii=False, indent=4)
@@ -318,6 +319,7 @@ def find_data_child(json_file, child_dir, save_dir):
 def find_child_to_text(child_dir, data_dir, save_dir):
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
+    print(data_dir)
     train_file = os.path.join(data_dir, 'train.json')
     val_file = os.path.join(data_dir, 'val.json')
     test_file = os.path.join(data_dir, 'test.json')
@@ -337,5 +339,9 @@ if __name__ == '__main__':
     # data_dir = r'D:\SX\classification\results\results_20240813_080040\data'
     # save_dir = data_dir + '_2'
     # find_child_to_text(child_dir, data_dir, save_dir)
+
+    child_dir = r'D:\project\fedgraph\kg-bgcn\child' 
+    data_dir = r'train_data\data'
+    save_dir = r'data_node'
     
-    find_child_to_text(child_dir, data_file, save_dir)
+    find_child_to_text(child_dir, data_dir, save_dir)

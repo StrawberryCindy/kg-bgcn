@@ -1,7 +1,10 @@
 /data_process/labels/
 /data_process/train_data/
 /child/
+/data_process/data_node/
 /src/results/
 /src/bert-classification/
 /src/latest_classification_model/
 .DS_Store
+data_process/__pycache__/
+src/__pycache__/

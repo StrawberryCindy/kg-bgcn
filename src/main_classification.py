@@ -1,6 +1,7 @@
 import json
 import torch
 import datasets
+import argparse
 from data_utils import load_and_prepare_datasets, load_and_prepare_datasets_shuffle
 from transformers import Trainer, AutoTokenizer, ErnieModel, BertForMaskedLM, TrainingArguments, BertForSequenceClassification, BertTokenizer
 from model_utils import (
@@ -16,10 +17,10 @@ import shutil
 from log_utils import log_info
 
 
-def main(data_path):
+def main(args, data_path):
     # 加载配置文件
     print(os.getcwd())
-    with open('./src/config.json', 'r') as f:
+    with open('config.json', 'r') as f:
         config = json.load(f)
 
     # 获取用户输入的模型类型
@@ -66,9 +67,9 @@ def main(data_path):
     # 选择数据文件路径
     # 选择数据文件路径
     if classification_type == "device":
-        data_file = data_path + '/device.json'
+        data_file = data_path + '\\device.json'
     if classification_type == "factory":
-        data_file = data_path + '/factory.json'
+        data_file = data_path + '\\factory.json'
     if classification_type == "node":
         data_dir = data_path
         tokenized_datasets = load_and_prepare_datasets(
@@ -87,7 +88,13 @@ def main(data_path):
     # 设置训练参数
     training_args = setup_training_args(output_dir, config)
     
-    device = torch.device('mps')
+        # specifying a target GPU
+    if args.gpu:
+        device = torch.device("cuda")
+        # running on a local machine with multiple gpu
+    else:
+        device = torch.device("cpu")
+    # device = torch.device('cpu')
     model.to(device)
 
     # 保存训练和验证的损失和准确率
@@ -156,10 +163,34 @@ if __name__ == "__main__":
     # data_path = r'E:\asset_kg\data_sample\graph_text\data1014'
     # data_path = r'E:\asset_kg\data_sample\graph_text\sample1014\data_factory_node'
     # data_path = r'E:\asset_kg\wangan_code\classification\results\results_20241217_152555\data_node'
-    
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-d", "--dataset", default="cora", type=str)
+
+    parser.add_argument("-f", "--fedtype", default="fedgcn", type=str)
+
+    parser.add_argument("-c", "--global_rounds", default=100, type=int)
+    parser.add_argument("-i", "--local_step", default=3, type=int)
+    parser.add_argument("-lr", "--learning_rate", default=0.5, type=float)
+
+    parser.add_argument("-n", "--n_trainer", default=5, type=int)
+    parser.add_argument("-nl", "--num_layers", default=2, type=int)
+    parser.add_argument("-nhop", "--num_hops", default=2, type=int)
+    parser.add_argument("-g", "--gpu", action="store_true")  # if -g, use gpu
+    parser.add_argument("-iid_b", "--iid_beta", default=10000, type=float)
+
+    parser.add_argument("-l", "--logdir", default="./runs", type=str)
+
+    parser.add_argument("-r", "--repeat_time", default=10, type=int)
+    args = parser.parse_args()
+    print(args)
     # config 此时修改"classification_type":"factory"/"device"
     # 此时data_path 为factory.json所在文件夹
     # num_labels 记得也要改一下
-    status_key = '0b8744fe-550c-4d3f-b450-ffbf65455d28'
-    data_dir = f"./data_process/train_data/{status_key}"
-    main(data_dir)
+    model = 'BGCN'  # BERT/BGCN
+    if model == 'BERT':
+        status_key = '0b8744fe-550c-4d3f-b450-ffbf65455d28'
+        data_dir = f"./data_process/train_data/{status_key}"
+        main(args, data_dir)
+    elif model == 'BGCN':
+        data_dir = f"..\data_process\data_node"
+        main(args, data_dir)
